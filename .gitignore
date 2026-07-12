@@ -1,0 +1,18 @@
+# .NET / Visual Studio generated files
+Source/bin/
+Source/obj/
+.vs/
+*.user
+*.suo
+
+# Local runtime and login data
+EdgeLoginProfile/
+*.log
+
+# Local narration and operation recordings (do not publish)
+抖音_AI余额看板娘.mp3
+抖音_AI余额看板娘.mp4
+
+# OS files
+Thumbs.db
+Desktop.ini

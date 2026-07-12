@@ -1,0 +1,36 @@
+<Window x:Class="CodexWidget.TestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="状态测试模式" Width="430" Height="360"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#FFF8EE" ShowInTaskbar="False">
+    <StackPanel Margin="22">
+        <TextBlock x:Name="TitleText" FontSize="20" FontWeight="Bold" Foreground="#D96022" Text="状态测试模式" />
+        <TextBlock x:Name="NoteText" TextWrapping="Wrap" FontSize="12" Foreground="#70401F" Margin="0,6,0,12"
+                   Text="拖动滑块预览角色各状态；关闭窗口即恢复真实数据。" />
+
+        <TextBlock x:Name="FiveLabel" FontWeight="Bold" Text="5小时余量" />
+        <DockPanel Margin="0,4,0,8">
+            <TextBlock x:Name="FiveValue" Width="52" VerticalAlignment="Center" />
+            <Slider x:Name="FiveSlider" Minimum="0" Maximum="100" Value="100" TickFrequency="5"
+                    ValueChanged="Changed" />
+        </DockPanel>
+
+        <TextBlock x:Name="WeekLabel" FontWeight="Bold" Text="周余量" />
+        <DockPanel Margin="0,4,0,8">
+            <TextBlock x:Name="WeekValue" Width="52" VerticalAlignment="Center" />
+            <Slider x:Name="WeekSlider" Minimum="0" Maximum="100" Value="100" TickFrequency="5"
+                    ValueChanged="Changed" />
+        </DockPanel>
+
+        <TextBlock x:Name="CardsLabel" FontWeight="Bold" Text="重置卡数" />
+        <DockPanel Margin="0,4,0,8">
+            <TextBlock x:Name="CardsValue" Width="52" VerticalAlignment="Center" />
+            <Slider x:Name="CardsSlider" Minimum="0" Maximum="9" Value="2" TickFrequency="1"
+                    IsSnapToTickEnabled="True" ValueChanged="Changed" />
+        </DockPanel>
+
+        <Button x:Name="CloseButton" Content="关闭并恢复真实数据" Margin="0,14,0,0" Padding="10,7"
+                Background="#F18A3D" Foreground="White" Click="Close_Click" />
+    </StackPanel>
+</Window>
