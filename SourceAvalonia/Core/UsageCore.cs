@@ -9,7 +9,8 @@ namespace CodexWidget;
 /// </summary>
 public sealed record UsageSnapshot(string FiveHourUsage, string FiveHourReset, string WeeklyUsage,
     string WeeklyReset, string ExtraUsage, string ExtraNote,
-    double? FiveHourRemaining = null, double? WeeklyRemaining = null, int? ResetCardCount = null);
+    double? FiveHourRemaining = null, double? WeeklyRemaining = null, int? ResetCardCount = null,
+    string Account = "", DateTime? CardExpiry = null);
 
 public static class UsageParser
 {

@@ -42,7 +42,7 @@ public partial class MainWindow : Window
     {
         ApplySettings(false);
         if (TryApplyDemo()) return;
-        usageWindow = new UsageWindow(settings.Provider);
+        usageWindow = new UsageWindow(settings.Provider) { UseCodexLocalApi = !settings.DisableCodexLocalApi };
         usageWindow.UsageUpdated += ApplyUsage;
         usageWindow.LoginRequired += () => Dispatcher.Invoke(() => UpdatedAt.Text = Loc.T("Usage.NeedLogin"));
         await usageWindow.StartAsync();
@@ -60,10 +60,12 @@ public partial class MainWindow : Window
         var five = Arg(1, 100);
         var week = Arg(2, 100);
         var cards = (int)Arg(3, 3);
+        demoRun = true;
         var expiries = string.Join("、", Enumerable.Range(0, cards)
-            .Select(i => DateTime.Now.AddDays(14 + i * 3).ToString("MM-dd HH:mm")));
+            .Select(i => DateTime.Now.AddDays(2 + i * 5).ToString("MM-dd HH:mm")));
         ApplyUsage(new UsageSnapshot($"{100 - five:0}% used", "12:00", $"{100 - week:0}% used", "07-15 08:00",
-            cards.ToString(), expiries, five, week, cards));
+            cards.ToString(), expiries, five, week, cards,
+            "demo@example.com", cards > 0 ? DateTime.Now.AddDays(2) : null));
         return true;
     }
 
@@ -93,6 +95,7 @@ public partial class MainWindow : Window
         Topmost = settings.AlwaysOnTop;
         if (!paceActive) refreshTimer.Interval = TimeSpan.FromMinutes(Math.Clamp(settings.RefreshMinutes, 1, 120));
         ClickThroughMenu.IsChecked = settings.ClickThrough;
+        if (usageWindow != null) usageWindow.UseCodexLocalApi = !settings.DisableCodexLocalApi;
         ApplyLocalization();
         ApplyMascot();
         ApplyAnimation();
@@ -114,7 +117,7 @@ public partial class MainWindow : Window
         MenuHotkeys.Header = Loc.T("Menu.Hotkeys");
         MenuExit.Header = Loc.T("Menu.Exit");
         CardBadge.ToolTip = Loc.T("Badge.Tooltip");
-        LoginButton.Content = Loc.T("Board.LoginBtn");
+        UpdateLoginButton();
         if (lastSnapshot != null) RenderUsage(lastSnapshot);
         else
         {
@@ -363,6 +366,7 @@ public partial class MainWindow : Window
     private bool paceActive;
     private int paceStillChecks;
     private bool testMode;
+    private bool demoRun;
 
     /// <summary>测试模式：用假余量驱动看板娘，供预览角色状态。</summary>
     public void ApplyTestUsage(double five, double week, int cards)
@@ -412,6 +416,10 @@ public partial class MainWindow : Window
             : TimeSpan.FromMinutes(Math.Clamp(settings.RefreshMinutes, 1, 120));
     }
 
+    private static readonly SolidColorBrush AlertBrush = new(System.Windows.Media.Color.FromRgb(0xD8, 0x30, 0x2E));
+    private static readonly SolidColorBrush NormalBrush = new(System.Windows.Media.Color.FromRgb(0x5C, 0x34, 0x1E));
+    private static readonly SolidColorBrush NormalDimBrush = new(System.Windows.Media.Color.FromRgb(0x8B, 0x62, 0x4A));
+
     private void RenderUsage(UsageSnapshot s)
     {
         string Show(string v) => string.IsNullOrWhiteSpace(v) ? Loc.T("Usage.NotShown") : v;
@@ -424,8 +432,42 @@ public partial class MainWindow : Window
             ? Loc.F("Usage.WeekLeft", wr.ToString("0"))
             : Loc.F("Usage.Week", Show(s.WeeklyUsage));
         WeekReset.Text = Loc.F("Usage.Reset", Show(s.WeeklyReset));
+        // 低余量红字警示：5 小时 ≤20%，周 <10%
+        FiveUsage.Foreground = s.FiveHourRemaining is <= 20 ? AlertBrush : NormalBrush;
+        WeekUsage.Foreground = s.WeeklyRemaining is < 10 ? AlertBrush : NormalBrush;
         ApplyProviderRows(s);
+        UpdateLoginButton();
         UpdatedAt.Text = Loc.F("Usage.UpdatedAt", DateTime.Now.ToString("HH:mm"));
+        MaybeNotifyCardExpiry(s);
+    }
+
+    /// <summary>已登录时按钮显示账号，点击可退出；未登录显示「登录」。</summary>
+    private void UpdateLoginButton()
+    {
+        if (lastSnapshot == null)
+        {
+            LoginButton.Content = Loc.T("Board.LoginBtn");
+            return;
+        }
+        var account = string.IsNullOrWhiteSpace(lastSnapshot.Account) ? Loc.T("Login.LoggedIn") : lastSnapshot.Account;
+        if (account.Length > 20) account = account[..19] + "…";
+        LoginButton.Content = "👤 " + account;
+    }
+
+    /// <summary>重置卡到期前 3 天：高亮到期行，并（每张卡仅一次）弹窗提醒。</summary>
+    private void MaybeNotifyCardExpiry(UsageSnapshot s)
+    {
+        var expiring = s.CardExpiry is { } exp && exp > DateTime.Now && exp - DateTime.Now <= TimeSpan.FromDays(3);
+        ExtraNoteText.Foreground = expiring ? AlertBrush : NormalDimBrush;
+        ExtraNoteText.FontWeight = expiring ? FontWeights.Bold : FontWeights.SemiBold;
+        if (!expiring || testMode || demoRun) return;
+        var key = s.CardExpiry!.Value.ToString("yyyy-MM-dd HH:mm");
+        if (settings.NotifiedCardExpiries.Contains(key)) return;
+        settings.NotifiedCardExpiries.Add(key);
+        while (settings.NotifiedCardExpiries.Count > 10) settings.NotifiedCardExpiries.RemoveAt(0);
+        settings.Save();
+        System.Windows.MessageBox.Show(this, Loc.F("Alert.CardExpiring", s.CardExpiry.Value.ToString("MM-dd HH:mm")),
+            Loc.T("Alert.Title"), MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     /// <summary>平台差异化栏位：Codex = 重置卡行（张数圆圈 + 每张到期日）；Claude = Fable 5 额度行；Gemini 无。</summary>
@@ -475,13 +517,50 @@ public partial class MainWindow : Window
     private void RefreshNow() { UpdatedAt.Text = Loc.T("Usage.Refreshing"); usageWindow?.RefreshUsage(); }
     private void Refresh_Click(object sender, RoutedEventArgs e) => RefreshNow();
 
-    /// <summary>点登录直接拉起浏览器跳到官方页，随后自动轮询同步，无指引窗口。</summary>
+    /// <summary>未登录：拉起浏览器登录并自动轮询；已登录：显示账号并询问是否退出。</summary>
     private void Login_Click(object sender, RoutedEventArgs e)
     {
         if (usageWindow == null) return;
+        if (lastSnapshot != null && !testMode)
+        {
+            var account = string.IsNullOrWhiteSpace(lastSnapshot.Account) ? Loc.T("Login.LoggedIn") : lastSnapshot.Account;
+            var msg = Loc.F("Login.LogoutAsk", account);
+            if (settings.Provider == "Codex" && !settings.DisableCodexLocalApi)
+                msg += "\n\n" + Loc.T("Login.CodexCliNote");
+            if (System.Windows.MessageBox.Show(this, msg, Loc.T("Login.LogoutTitle"),
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                Logout();
+            return;
+        }
+        settings.DisableCodexLocalApi = false;
+        settings.Save();
+        usageWindow.UseCodexLocalApi = true;
         UpdatedAt.Text = usageWindow.LaunchLogin(settings.Browser)
             ? Loc.T("Login.Opened")
             : Loc.T("Login.NoBrowser");
+    }
+
+    /// <summary>退出登录：清除挂件的浏览器登录资料；Codex 另外停止读取本机 CLI 登录态。</summary>
+    private void Logout()
+    {
+        if (settings.Provider == "Codex")
+        {
+            settings.DisableCodexLocalApi = true;
+            if (usageWindow != null) usageWindow.UseCodexLocalApi = false;
+        }
+        settings.Save();
+        try
+        {
+            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexUmaruWidget");
+            foreach (var dir in Directory.GetDirectories(root, "LoginProfile-*").Append(Path.Combine(root, "EdgeLoginProfile")))
+                if (Directory.Exists(dir))
+                    try { Directory.Delete(dir, true); } catch { /* 浏览器占用时跳过 */ }
+        }
+        catch { }
+        lastSnapshot = null;
+        ApplyLocalization();
+        ApplyMascot();
+        UpdatedAt.Text = Loc.T("Login.LogoutDone");
     }
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowSettings();
 

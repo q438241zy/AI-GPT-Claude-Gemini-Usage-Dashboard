@@ -13,7 +13,7 @@ public static class Loc
     private static readonly Dictionary<string, string[]> Table = new()
     {
         // 看板
-        ["Board.Title"] = new[] { "{0} 能量看板", "{0} Energy Board", "{0} エネルギーボード" },
+        ["Board.Title"] = new[] { "{0} 仪表盘", "{0} Dashboard", "{0} ダッシュボード" },
         ["Usage.Five"] = new[] { "⏱ 5小时用量：{0}", "⏱ 5-hour usage: {0}", "⏱ 5時間使用量：{0}" },
         ["Usage.FiveLeft"] = new[] { "⏱ 5小时余量：{0}%", "⏱ 5-hour left: {0}%", "⏱ 5時間残量：{0}%" },
         ["Usage.WeekLeft"] = new[] { "📅 周余量：{0}%", "📅 Weekly left: {0}%", "📅 週間残量：{0}%" },
@@ -35,6 +35,23 @@ public static class Loc
         ["Usage.CardExpiry"] = new[] { "   到期：{0}", "   Expires: {0}", "   期限：{0}" },
         ["Login.Opened"] = new[] { "浏览器已打开，登录后会自动同步", "Browser opened — will sync after sign-in", "ブラウザを開きました。ログイン後自動同期します" },
         ["Login.NoBrowser"] = new[] { "找不到 Chrome / Edge 浏览器", "Chrome / Edge not found", "Chrome / Edge が見つかりません" },
+        ["Login.LoggedIn"] = new[] { "已登录", "Signed in", "ログイン済み" },
+        ["Login.LogoutTitle"] = new[] { "退出登录", "Sign out", "ログアウト" },
+        ["Login.LogoutAsk"] = new[] { "当前账号：{0}\n\n要退出登录吗？", "Current account: {0}\n\nSign out?", "現在のアカウント：{0}\n\nログアウトしますか？" },
+        ["Login.CodexCliNote"] = new[]
+        {
+            "说明：Codex 数据来自本机 Codex CLI 登录。退出后挂件将不再读取它（随时点「登录」恢复）；如需彻底退出 CLI 请在终端执行 codex logout。",
+            "Note: Codex data comes from the local Codex CLI login. After sign-out this widget stops reading it (click Login anytime to restore); to fully sign out run codex logout in a terminal.",
+            "注：Codex データはローカル Codex CLI のログインから取得。ログアウト後は読み取りを停止します（「ログイン」で復元可）。CLI 自体は codex logout で。"
+        },
+        ["Login.LogoutDone"] = new[] { "已退出登录", "Signed out", "ログアウトしました" },
+        ["Alert.Title"] = new[] { "重置卡到期提醒", "Reset card expiry reminder", "リセットカード期限のお知らせ" },
+        ["Alert.CardExpiring"] = new[]
+        {
+            "有重置卡将在 3 天内到期（{0}），记得及时使用！",
+            "A reset card expires within 3 days ({0}) — use it before it's gone!",
+            "リセットカードが 3 日以内に期限切れになります（{0}）。お早めに！"
+        },
 
         // 右键菜单
         ["Menu.Settings"] = new[] { "⚙ 设置…", "⚙ Settings…", "⚙ 設定…" },
@@ -64,6 +81,9 @@ public static class Loc
 
         // 设置窗口
         ["Set.Title"] = new[] { "桌面额度挂件设置", "Widget Settings", "ウィジェット設定" },
+        ["Set.SecGeneral"] = new[] { "常规", "GENERAL", "一般" },
+        ["Set.SecLook"] = new[] { "外观", "APPEARANCE", "外観" },
+        ["Set.SecBehavior"] = new[] { "行为", "BEHAVIOR", "動作" },
         ["Set.Language"] = new[] { "语言 / Language / 言語", "语言 / Language / 言語", "语言 / Language / 言語" },
         ["Set.Provider"] = new[] { "平台", "Provider", "プラットフォーム" },
         ["Set.Browser"] = new[] { "登录用浏览器", "Login browser", "ログイン用ブラウザ" },

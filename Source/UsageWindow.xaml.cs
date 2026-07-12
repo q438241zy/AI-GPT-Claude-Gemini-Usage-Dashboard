@@ -23,6 +23,9 @@ public partial class UsageWindow : Window
     public event Action<UsageSnapshot>? UsageUpdated;
     public event Action? LoginRequired;
 
+    /// <summary>用户退出登录后置 false，停止读取本机 Codex CLI 登录态。</summary>
+    public bool UseCodexLocalApi { get; set; } = true;
+
     public UsageWindow(string initialProvider)
     {
         provider = initialProvider;
@@ -140,7 +143,7 @@ public partial class UsageWindow : Window
     private async Task TryCollectAsync(bool showFeedback)
     {
         // Codex：优先用本机 Codex CLI 登录态直连官方接口（含重置卡），无需 Edge
-        if (provider == "Codex")
+        if (provider == "Codex" && UseCodexLocalApi)
         {
             var api = await CodexLocalApi.TryFetchAsync();
             if (api != null)
@@ -226,7 +229,8 @@ public partial class UsageWindow : Window
 /// </summary>
 public sealed record UsageSnapshot(string FiveHourUsage, string FiveHourReset, string WeeklyUsage,
     string WeeklyReset, string ExtraUsage, string ExtraNote,
-    double? FiveHourRemaining = null, double? WeeklyRemaining = null, int? ResetCardCount = null);
+    double? FiveHourRemaining = null, double? WeeklyRemaining = null, int? ResetCardCount = null,
+    string Account = "", DateTime? CardExpiry = null);
 
 internal static class UsageParser
 {

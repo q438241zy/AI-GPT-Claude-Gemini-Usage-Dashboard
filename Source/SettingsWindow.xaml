@@ -1,88 +1,272 @@
 <Window x:Class="CodexWidget.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="桌面额度挂件设置" Width="480" Height="700"
-        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
-        Background="#FFF8EE">
-    <Grid Margin="24">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <TextBlock x:Name="TitleText" Text="桌面额度挂件设置" FontSize="25" FontWeight="Bold" Foreground="#D96022" />
+        Title="桌面额度挂件设置" Width="440" Height="712"
+        WindowStartupLocation="Manual" ResizeMode="NoResize"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        FontFamily="Microsoft YaHei UI">
+    <Window.Resources>
+        <!-- 现代浅色卡片风格 -->
+        <SolidColorBrush x:Key="Accent" Color="#F18A3D" />
+        <SolidColorBrush x:Key="AccentDark" Color="#E2761F" />
+        <SolidColorBrush x:Key="Ink" Color="#33302C" />
+        <SolidColorBrush x:Key="InkDim" Color="#8B857D" />
 
-        <StackPanel Grid.Row="1" Margin="0,18,0,10">
-            <TextBlock x:Name="LanguageLabel" Text="语言 / Language / 言語" FontWeight="Bold" />
-            <ComboBox x:Name="LanguageBox" Margin="0,5,0,12" Height="30" SelectionChanged="Control_Changed">
-                <ComboBoxItem Content="中文" Tag="zh" />
-                <ComboBoxItem Content="English" Tag="en" />
-                <ComboBoxItem Content="日本語" Tag="ja" />
-            </ComboBox>
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background" Value="#FAF8F4" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource InkDim}" />
+            <Setter Property="Margin" Value="2,0,0,8" />
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
 
-            <TextBlock x:Name="ProviderLabel" Text="平台" FontWeight="Bold" />
-            <ComboBox x:Name="ProviderBox" Margin="0,5,0,12" Height="30" SelectionChanged="Control_Changed">
-                <ComboBoxItem Content="Codex" Tag="Codex" />
-                <ComboBoxItem Content="Gemini" Tag="Gemini" />
-                <ComboBoxItem Content="Claude" Tag="Claude" />
-            </ComboBox>
+        <Style x:Key="GhostButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="White" BorderBrush="#E2DDD5" BorderThickness="1"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#F4F0EA" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource GhostButton}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{StaticResource Accent}" CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource AccentDark}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <TextBlock x:Name="BrowserLabel" Text="登录用浏览器" FontWeight="Bold" />
-            <ComboBox x:Name="BrowserBox" Margin="0,5,0,12" Height="30" SelectionChanged="Control_Changed">
-                <ComboBoxItem Content="Chrome" Tag="Chrome" />
-                <ComboBoxItem Content="Edge" Tag="Edge" />
-            </ComboBox>
+        <!-- 开关样式复选框 -->
+        <Style x:Key="Switch" TargetType="CheckBox">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="0,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <DockPanel Background="Transparent">
+                            <Border x:Name="Track" DockPanel.Dock="Right" Width="42" Height="23" CornerRadius="12"
+                                    Background="#DAD4CA" VerticalAlignment="Center" Margin="10,0,0,0">
+                                <Ellipse x:Name="Dot" Width="17" Height="17" Fill="White"
+                                         HorizontalAlignment="Left" Margin="3,0" />
+                            </Border>
+                            <ContentPresenter VerticalAlignment="Center"
+                                              TextElement.FontSize="13" TextElement.Foreground="#33302C" />
+                        </DockPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Track" Property="Background" Value="{StaticResource Accent}" />
+                                <Setter TargetName="Dot" Property="HorizontalAlignment" Value="Right" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <TextBlock x:Name="CharacterLabel" Text="角色" FontWeight="Bold" />
-            <DockPanel Margin="0,5,0,4">
-                <ComboBox x:Name="CharacterBox" Height="30" Width="220" HorizontalAlignment="Left"
-                          SelectionChanged="Control_Changed" />
-                <Button x:Name="ImportImageButton" Content="导入 PNG / GIF…" Margin="10,0,0,0" Padding="10,3" Click="Browse_Click" />
+        <!-- 圆头滑杆 -->
+        <Style x:Key="SliderRepeat" TargetType="RepeatButton">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="{TemplateBinding Background}" Height="6" CornerRadius="3" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ModernSlider" TargetType="Slider">
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid VerticalAlignment="Center">
+                            <Track x:Name="PART_Track">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource SliderRepeat}" Background="{StaticResource Accent}"
+                                                  Command="Slider.DecreaseLarge" />
+                                </Track.DecreaseRepeatButton>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource SliderRepeat}" Background="#E8E2D8"
+                                                  Command="Slider.IncreaseLarge" />
+                                </Track.IncreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb Width="18" Height="18">
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Ellipse Fill="White" Stroke="{StaticResource Accent}" StrokeThickness="2.5" />
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- 外层留边给阴影 -->
+    <Border Margin="12" Background="White" CornerRadius="16">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="22" ShadowDepth="3" Opacity="0.28" Color="#5A4632" />
+        </Border.Effect>
+        <Grid Margin="20,14,20,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 自绘标题栏（可拖动） -->
+            <DockPanel Grid.Row="0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Button x:Name="CloseXButton" DockPanel.Dock="Right" Content="✕" Width="30" Height="30"
+                        Style="{StaticResource GhostButton}" Padding="0" Click="CloseX_Click" />
+                <TextBlock x:Name="TitleText" Text="桌面额度挂件设置" FontSize="18" FontWeight="Bold"
+                           Foreground="{StaticResource Ink}" VerticalAlignment="Center" />
             </DockPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Button x:Name="ImportPackButton" Content="导入角色包…" Padding="10,3" Click="ImportPack_Click" />
-                <Button x:Name="OpenPackDirButton" Content="打开角色文件夹" Margin="8,0,0,0" Padding="10,3" Click="OpenPackDir_Click" />
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,4">
+                <StackPanel>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock x:Name="SectionGeneral" Style="{StaticResource SectionTitle}" Text="常规" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="128" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="8" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="8" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock x:Name="LanguageLabel" Style="{StaticResource FieldLabel}" Text="语言" />
+                                <ComboBox x:Name="LanguageBox" Grid.Column="1" SelectionChanged="Control_Changed">
+                                    <ComboBoxItem Content="中文" Tag="zh" />
+                                    <ComboBoxItem Content="English" Tag="en" />
+                                    <ComboBoxItem Content="日本語" Tag="ja" />
+                                </ComboBox>
+                                <TextBlock x:Name="ProviderLabel" Grid.Row="2" Style="{StaticResource FieldLabel}" Text="平台" />
+                                <ComboBox x:Name="ProviderBox" Grid.Row="2" Grid.Column="1" SelectionChanged="Control_Changed">
+                                    <ComboBoxItem Content="Codex" Tag="Codex" />
+                                    <ComboBoxItem Content="Gemini" Tag="Gemini" />
+                                    <ComboBoxItem Content="Claude" Tag="Claude" />
+                                </ComboBox>
+                                <TextBlock x:Name="BrowserLabel" Grid.Row="4" Style="{StaticResource FieldLabel}" Text="登录用浏览器" />
+                                <ComboBox x:Name="BrowserBox" Grid.Row="4" Grid.Column="1" SelectionChanged="Control_Changed">
+                                    <ComboBoxItem Content="Chrome" Tag="Chrome" />
+                                    <ComboBoxItem Content="Edge" Tag="Edge" />
+                                </ComboBox>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock x:Name="CharacterLabel" Style="{StaticResource SectionTitle}" Text="角色" />
+                            <ComboBox x:Name="CharacterBox" SelectionChanged="Control_Changed" />
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button x:Name="ImportImageButton" Style="{StaticResource GhostButton}"
+                                        Content="导入 PNG / GIF…" Click="Browse_Click" />
+                                <Button x:Name="ImportPackButton" Style="{StaticResource GhostButton}" Margin="8,0,0,0"
+                                        Content="导入角色包…" Click="ImportPack_Click" />
+                                <Button x:Name="OpenPackDirButton" Style="{StaticResource GhostButton}" Margin="8,0,0,0"
+                                        Content="打开角色文件夹" Click="OpenPackDir_Click" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock x:Name="SectionLook" Style="{StaticResource SectionTitle}" Text="外观" />
+                            <DockPanel>
+                                <TextBlock x:Name="ScaleLabelTitle" Style="{StaticResource FieldLabel}" Width="94" Text="大小" />
+                                <TextBlock x:Name="ScaleLabel" DockPanel.Dock="Right" Width="46" TextAlignment="Right"
+                                           Style="{StaticResource FieldLabel}" Foreground="{StaticResource InkDim}" />
+                                <Slider x:Name="ScaleSlider" Style="{StaticResource ModernSlider}"
+                                        Minimum="0.45" Maximum="1.35" ValueChanged="ScaleSlider_ValueChanged" />
+                            </DockPanel>
+                            <DockPanel Margin="0,8,0,0">
+                                <TextBlock x:Name="OpacityLabelTitle" Style="{StaticResource FieldLabel}" Width="94" Text="透明度" />
+                                <TextBlock x:Name="OpacityLabel" DockPanel.Dock="Right" Width="46" TextAlignment="Right"
+                                           Style="{StaticResource FieldLabel}" Foreground="{StaticResource InkDim}" />
+                                <Slider x:Name="OpacitySlider" Style="{StaticResource ModernSlider}"
+                                        Minimum="0.25" Maximum="1" ValueChanged="OpacitySlider_ValueChanged" />
+                            </DockPanel>
+                            <CheckBox x:Name="AnimateCheck" Style="{StaticResource Switch}" Content="启用动态效果"
+                                      Margin="0,12,0,4" Checked="Control_Changed" Unchecked="Control_Changed" />
+                            <DockPanel Margin="0,2,0,0">
+                                <TextBlock x:Name="SpeedLabel" Style="{StaticResource FieldLabel}" Width="94" Text="动画速度" />
+                                <Slider x:Name="SpeedSlider" Style="{StaticResource ModernSlider}"
+                                        Minimum="0.4" Maximum="2.5" Value="1" ValueChanged="Control_ValueChanged" />
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock x:Name="SectionBehavior" Style="{StaticResource SectionTitle}" Text="行为" />
+                            <CheckBox x:Name="TopmostCheck" Style="{StaticResource Switch}" Content="永远置顶"
+                                      Checked="Control_Changed" Unchecked="Control_Changed" />
+                            <CheckBox x:Name="ClickThroughCheck" Style="{StaticResource Switch}" Content="鼠标穿透"
+                                      Checked="Control_Changed" Unchecked="Control_Changed" />
+                            <DockPanel Margin="0,8,0,2">
+                                <TextBlock x:Name="RefreshLabel" Style="{StaticResource FieldLabel}" Width="150" Text="自动刷新（分钟）" />
+                                <TextBox x:Name="RefreshBox" Width="64" Height="28" HorizontalAlignment="Left"
+                                         VerticalContentAlignment="Center" Text="5" TextChanged="Control_TextChanged" />
+                            </DockPanel>
+                            <Button x:Name="TestModeButton" Style="{StaticResource GhostButton}" HorizontalAlignment="Left"
+                                    Margin="0,10,0,0" Content="🧪 测试模式…" Click="TestMode_Click" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
+                <Button x:Name="CancelButton" Style="{StaticResource GhostButton}" Content="取消" Width="92" IsCancel="True" />
+                <Button x:Name="SaveButton" Style="{StaticResource AccentButton}" Content="保存" Width="92" Margin="10,0,0,0"
+                        IsDefault="True" Click="Save_Click" />
             </StackPanel>
-
-            <TextBlock x:Name="ScaleLabelTitle" Text="大小（实时生效）" FontWeight="Bold" />
-            <DockPanel Margin="0,5,0,10">
-                <TextBlock x:Name="ScaleLabel" Width="52" VerticalAlignment="Center" />
-                <Slider x:Name="ScaleSlider" Minimum="0.45" Maximum="1.35" TickFrequency="0.05"
-                        ValueChanged="ScaleSlider_ValueChanged" />
-            </DockPanel>
-
-            <TextBlock x:Name="OpacityLabelTitle" Text="透明度（实时生效）" FontWeight="Bold" />
-            <DockPanel Margin="0,5,0,10">
-                <TextBlock x:Name="OpacityLabel" Width="52" VerticalAlignment="Center" />
-                <Slider x:Name="OpacitySlider" Minimum="0.25" Maximum="1" TickFrequency="0.05"
-                        ValueChanged="OpacitySlider_ValueChanged" />
-            </DockPanel>
-
-            <CheckBox x:Name="AnimateCheck" Content="启用动态效果" Margin="0,4"
-                      Checked="Control_Changed" Unchecked="Control_Changed" />
-            <DockPanel Margin="20,2,0,8">
-                <TextBlock x:Name="SpeedLabel" Text="动画速度" Width="90" VerticalAlignment="Center" />
-                <Slider x:Name="SpeedSlider" Minimum="0.4" Maximum="2.5" Value="1" TickFrequency="0.1"
-                        ValueChanged="Control_ValueChanged" />
-            </DockPanel>
-            <CheckBox x:Name="TopmostCheck" Content="永远置顶" Margin="0,4"
-                      Checked="Control_Changed" Unchecked="Control_Changed" />
-            <CheckBox x:Name="ClickThroughCheck" Content="鼠标穿透" Margin="0,4"
-                      Checked="Control_Changed" Unchecked="Control_Changed" />
-
-            <DockPanel Margin="0,8,0,0">
-                <TextBlock x:Name="RefreshLabel" Text="自动刷新（分钟）" Width="140" VerticalAlignment="Center" />
-                <TextBox x:Name="RefreshBox" Width="60" Text="5" TextChanged="Control_TextChanged" />
-            </DockPanel>
-
-            <Button x:Name="TestModeButton" Content="🧪 测试模式…" HorizontalAlignment="Left"
-                    Margin="0,14,0,0" Padding="12,5" Click="TestMode_Click" />
-        </StackPanel>
-
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="CancelButton" Content="取消" Width="86" Margin="5" IsCancel="True" />
-            <Button x:Name="SaveButton" Content="保存" Width="86" Margin="5" IsDefault="True" Click="Save_Click"
-                    Background="#F18A3D" Foreground="White" />
-        </StackPanel>
-    </Grid>
+        </Grid>
+    </Border>
 </Window>

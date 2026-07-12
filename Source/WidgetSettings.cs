@@ -17,6 +17,10 @@ public sealed class WidgetSettings
     public bool AlwaysOnTop { get; set; } = true;
     public bool ClickThrough { get; set; }
     public int RefreshMinutes { get; set; } = 5;
+    /// <summary>用户主动退出登录后置 true：不再读取本机 Codex CLI 登录态。</summary>
+    public bool DisableCodexLocalApi { get; set; }
+    /// <summary>已经弹过“重置卡将到期”的到期时间戳，避免重复打扰。</summary>
+    public List<string> NotifiedCardExpiries { get; set; } = new();
 
     public WidgetSettings Clone() => (WidgetSettings)MemberwiseClone();
 

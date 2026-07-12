@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CodexWidget;
 
@@ -22,6 +23,7 @@ public partial class SettingsWindow : Window
         testApply = applyTest;
         testEnd = endTest;
         Closed += (_, _) => testWindow?.Close();
+        Loaded += (_, _) => PositionBesideOwner();
 
         RefreshCharacterItems(Value.Character);
         SelectByTag(LanguageBox, Value.Language);
@@ -38,6 +40,25 @@ public partial class SettingsWindow : Window
         ApplyLanguage();
         ready = true;
     }
+
+    /// <summary>设置窗口开在挂件左侧，不遮住角色；左边放不下再退到右边。</summary>
+    private void PositionBesideOwner()
+    {
+        if (Owner == null) { WindowStartupLocation = WindowStartupLocation.CenterScreen; return; }
+        var area = SystemParameters.WorkArea;
+        var left = Owner.Left - Width - 12;
+        if (left < area.Left + 8) left = Math.Min(Owner.Left + Owner.Width + 12, area.Right - Width - 8);
+        Left = Math.Max(area.Left + 8, left);
+        var top = Owner.Top + Owner.Height - Height;
+        Top = Math.Max(area.Top + 8, Math.Min(top, area.Bottom - Height - 8));
+    }
+
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == MouseButtonState.Pressed) DragMove();
+    }
+
+    private void CloseX_Click(object sender, RoutedEventArgs e) => DialogResult = false;
 
     /// <summary>角色下拉：内置（中文名）+ 已装角色包 + 自定义图片。</summary>
     private void RefreshCharacterItems(string selectedKey)
@@ -67,6 +88,9 @@ public partial class SettingsWindow : Window
         Loc.Lang = TagOf(LanguageBox) is { Length: > 0 } lang ? lang : Value.Language;
         Title = Loc.T("Set.Title");
         TitleText.Text = Loc.T("Set.Title");
+        SectionGeneral.Text = Loc.T("Set.SecGeneral");
+        SectionLook.Text = Loc.T("Set.SecLook");
+        SectionBehavior.Text = Loc.T("Set.SecBehavior");
         LanguageLabel.Text = Loc.T("Set.Language");
         ProviderLabel.Text = Loc.T("Set.Provider");
         BrowserLabel.Text = Loc.T("Set.Browser");

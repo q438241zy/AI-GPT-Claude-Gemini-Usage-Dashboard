@@ -30,7 +30,7 @@ public static class CodexLocalApi
             if (usageJson == null && creditsJson == null) return null;
 
             double? fiveLeft = null, weekLeft = null;
-            string fiveReset = "", weekReset = "";
+            string fiveReset = "", weekReset = "", account = "";
             if (usageJson != null)
             {
                 using var doc = JsonDocument.Parse(usageJson);
@@ -40,21 +40,24 @@ public static class CodexLocalApi
                 weekLeft = FindPercentLeft(items, WeekKeys);
                 fiveReset = FindReset(items, FiveKeys);
                 weekReset = FindReset(items, WeekKeys);
+                account = items.FirstOrDefault(x => x.Path.EndsWith("/email") && x.El.ValueKind == JsonValueKind.String)
+                    .El is { ValueKind: JsonValueKind.String } em ? em.GetString() ?? "" : "";
             }
 
             int? cardCount = null;
             var cardExpiry = "";
+            DateTime? nearestExpiry = null;
             if (creditsJson != null)
             {
                 using var doc = JsonDocument.Parse(creditsJson);
-                (cardCount, cardExpiry) = CountCredits(doc.RootElement);
+                (cardCount, cardExpiry, nearestExpiry) = CountCredits(doc.RootElement);
             }
 
             if (fiveLeft == null && weekLeft == null && cardCount == null) return null;
 
             string UsedText(double? left) => left is { } v ? $"{100 - v:0}%" : "";
             return new UsageSnapshot(UsedText(fiveLeft), fiveReset, UsedText(weekLeft), weekReset,
-                cardCount?.ToString() ?? "", cardExpiry, fiveLeft, weekLeft, cardCount);
+                cardCount?.ToString() ?? "", cardExpiry, fiveLeft, weekLeft, cardCount, account, nearestExpiry);
         }
         catch { return null; }
     }
@@ -155,28 +158,28 @@ public static class CodexLocalApi
         return "";
     }
 
-    private static string? FormatTime(JsonElement el)
+    private static DateTime? ParseTime(JsonElement el)
     {
         if (el.ValueKind == JsonValueKind.Number)
         {
             var n = el.GetDouble();
-            DateTime t;
-            if (n > 1e12) t = DateTimeOffset.FromUnixTimeMilliseconds((long)n).LocalDateTime;
-            else if (n > 1e9) t = DateTimeOffset.FromUnixTimeSeconds((long)n).LocalDateTime;
-            else if (n > 0) t = DateTime.Now.AddSeconds(n); // 剩余秒数
-            else return null;
-            return t.ToString("MM-dd HH:mm");
+            if (n > 1e12) return DateTimeOffset.FromUnixTimeMilliseconds((long)n).LocalDateTime;
+            if (n > 1e9) return DateTimeOffset.FromUnixTimeSeconds((long)n).LocalDateTime;
+            if (n > 0) return DateTime.Now.AddSeconds(n); // 剩余秒数
+            return null;
         }
         if (el.ValueKind == JsonValueKind.String && DateTimeOffset.TryParse(el.GetString(), out var dto))
-            return dto.LocalDateTime.ToString("MM-dd HH:mm");
+            return dto.LocalDateTime;
         return null;
     }
 
-    /// <summary>统计可用重置卡张数，并列出每张卡的到期时间（顿号分隔）。</summary>
-    private static (int? count, string expiry) CountCredits(JsonElement root)
+    private static string? FormatTime(JsonElement el) => ParseTime(el)?.ToString("MM-dd HH:mm");
+
+    /// <summary>统计可用重置卡张数、每张到期时间（顿号分隔）与最近一张的到期时刻。</summary>
+    private static (int? count, string expiry, DateTime? nearest) CountCredits(JsonElement root)
     {
         int? count = null;
-        var expiries = new List<string>();
+        var expiries = new List<DateTime>();
 
         // 首选结构化解析：credits 数组里每个对象的 status / expires_at
         if (root.ValueKind == JsonValueKind.Object &&
@@ -189,7 +192,7 @@ public static class CodexLocalApi
                 var status = credit.TryGetProperty("status", out var st) ? st.GetString()?.ToLowerInvariant() ?? "" : "available";
                 if (!(status.Contains("avail") || status.Contains("active") || status.Contains("granted") || status.Contains("unused"))) continue;
                 available++;
-                if (credit.TryGetProperty("expires_at", out var exp) && FormatTime(exp) is { } t) expiries.Add(t);
+                if (credit.TryGetProperty("expires_at", out var exp) && ParseTime(exp) is { } t) expiries.Add(t);
             }
             count = available;
         }
@@ -207,10 +210,12 @@ public static class CodexLocalApi
             if (statuses.Count > 0)
                 count = statuses.Count(s => s.Contains("avail") || s.Contains("active") || s.Contains("granted") || s.Contains("unused"));
             expiries = items.Where(x => x.Path.Contains("expire"))
-                .Select(x => FormatTime(x.El)).Where(t => t != null).Select(t => t!).ToList();
+                .Select(x => ParseTime(x.El)).Where(t => t != null).Select(t => t!.Value).ToList();
         }
 
         expiries.Sort();
-        return (count, string.Join("、", expiries.Distinct()));
+        expiries = expiries.Distinct().ToList();
+        var text = string.Join("、", expiries.Select(t => t.ToString("MM-dd HH:mm")));
+        return (count, text, expiries.Count > 0 ? expiries[0] : null);
     }
 }

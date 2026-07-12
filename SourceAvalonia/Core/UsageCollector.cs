@@ -22,6 +22,9 @@ public sealed class UsageCollector
 
     public string Provider { get; set; } = "Codex";
 
+    /// <summary>用户退出登录后置 false，停止读取本机 Codex CLI 登录态。</summary>
+    public bool UseCodexLocalApi { get; set; } = true;
+
     private string UsageUrl => Provider switch
     {
         "Gemini" => "https://gemini.google.com/app",
@@ -39,7 +42,7 @@ public sealed class UsageCollector
     /// <summary>采集一次。返回 null 表示未登录 / 未连接到官方页面。</summary>
     public async Task<UsageSnapshot?> CollectAsync()
     {
-        if (Provider == "Codex")
+        if (Provider == "Codex" && UseCodexLocalApi)
         {
             var api = await CodexLocalApi.TryFetchAsync();
             if (api != null) return api;

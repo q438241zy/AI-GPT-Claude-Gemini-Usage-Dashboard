@@ -59,7 +59,8 @@ public partial class MainWindow : Window
         var week = Arg(2, 100);
         var cards = (int)Arg(3, 3);
         lastSnapshot = new UsageSnapshot($"{100 - five:0}%", "12:00", $"{100 - week:0}%", "07-15 08:00",
-            cards.ToString(), "07-27 08:05", five, week, cards);
+            cards.ToString(), DateTime.Now.AddDays(2).ToString("MM-dd HH:mm"), five, week, cards,
+            "demo@example.com", cards > 0 ? DateTime.Now.AddDays(2) : null);
         RenderUsage(lastSnapshot);
         ApplyMascot();
         return true;
@@ -68,6 +69,7 @@ public partial class MainWindow : Window
     private async Task CollectAndRenderAsync()
     {
         collector.Provider = settings.Provider;
+        collector.UseCodexLocalApi = !settings.DisableCodexLocalApi;
         var snapshot = await collector.CollectAsync();
         if (snapshot == null)
         {
@@ -128,6 +130,10 @@ public partial class MainWindow : Window
         }
     }
 
+    private static readonly SolidColorBrush AlertBrush = new(Color.FromRgb(0xD8, 0x30, 0x2E));
+    private static readonly SolidColorBrush NormalBrush = new(Color.FromRgb(0x5C, 0x34, 0x1E));
+    private static readonly SolidColorBrush NormalDimBrush = new(Color.FromRgb(0x8B, 0x62, 0x4A));
+
     private void RenderUsage(UsageSnapshot s)
     {
         string Show(string v) => string.IsNullOrWhiteSpace(v) ? Loc.T("Usage.NotShown") : v;
@@ -139,8 +145,25 @@ public partial class MainWindow : Window
             ? Loc.F("Usage.WeekLeft", wr.ToString("0"))
             : Loc.F("Usage.Week", Show(s.WeeklyUsage));
         WeekReset.Text = Loc.F("Usage.Reset", Show(s.WeeklyReset));
+        // 低余量红字警示：5 小时 ≤20%，周 <10%
+        FiveUsage.Foreground = s.FiveHourRemaining is <= 20 ? AlertBrush : NormalBrush;
+        WeekUsage.Foreground = s.WeeklyRemaining is < 10 ? AlertBrush : NormalBrush;
         ApplyProviderRows(s);
+        UpdateLoginButton();
         UpdatedAt.Text = Loc.F("Usage.UpdatedAt", DateTime.Now.ToString("HH:mm"));
+    }
+
+    /// <summary>已登录时按钮显示账号；未登录显示「登录」。</summary>
+    private void UpdateLoginButton()
+    {
+        if (lastSnapshot == null)
+        {
+            LoginButton.Content = Loc.T("Board.LoginBtn");
+            return;
+        }
+        var account = string.IsNullOrWhiteSpace(lastSnapshot.Account) ? Loc.T("Login.LoggedIn") : lastSnapshot.Account;
+        if (account.Length > 20) account = account[..19] + "…";
+        LoginButton.Content = "👤 " + account;
     }
 
     /// <summary>平台差异化栏位：Codex 显示重置卡行 + 圆圈徽章 + 到期；Claude 显示 Fable 5 行；Gemini 皆无。</summary>
@@ -158,6 +181,10 @@ public partial class MainWindow : Window
             CardBadgeText.Text = s?.ResetCardCount?.ToString() ?? "—";
             if (!string.IsNullOrWhiteSpace(s?.ExtraNote))
                 CardExpiry.Text = Loc.F("Usage.CardExpiry", s!.ExtraNote);
+            // 重置卡 3 天内到期 → 到期行红字高亮
+            var expiring = s?.CardExpiry is { } exp && exp > DateTime.Now && exp - DateTime.Now <= TimeSpan.FromDays(3);
+            CardExpiry.Foreground = expiring ? AlertBrush : NormalDimBrush;
+            CardExpiry.FontWeight = expiring ? Avalonia.Media.FontWeight.Bold : Avalonia.Media.FontWeight.Normal;
         }
         if (isClaude)
         {
@@ -369,12 +396,77 @@ public partial class MainWindow : Window
         _ = CollectAndRenderAsync();
     }
 
-    private void Login_Click(object? sender, RoutedEventArgs e)
+    private async void Login_Click(object? sender, RoutedEventArgs e)
     {
         if (demoMode) return;
+        if (lastSnapshot != null)
+        {
+            var account = string.IsNullOrWhiteSpace(lastSnapshot.Account) ? Loc.T("Login.LoggedIn") : lastSnapshot.Account;
+            var msg = Loc.F("Login.LogoutAsk", account);
+            if (settings.Provider == "Codex" && !settings.DisableCodexLocalApi)
+                msg += "\n\n" + Loc.T("Login.CodexCliNote");
+            if (await ConfirmAsync(Loc.T("Login.LogoutTitle"), msg)) Logout();
+            return;
+        }
+        settings.DisableCodexLocalApi = false;
+        settings.Save();
         if (!collector.LaunchLogin(settings.Browser)) { UpdatedAt.Text = Loc.T("Login.NoBrowser"); return; }
         UpdatedAt.Text = Loc.T("Login.Opened");
         StartLoginPolling();
+    }
+
+    /// <summary>退出登录：清除挂件的浏览器登录资料；Codex 另外停止读取本机 CLI 登录态。</summary>
+    private void Logout()
+    {
+        if (settings.Provider == "Codex") settings.DisableCodexLocalApi = true;
+        settings.Save();
+        try
+        {
+            var root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexUmaruWidget");
+            foreach (var dir in Directory.GetDirectories(root, "LoginProfile-*"))
+                try { Directory.Delete(dir, true); } catch { /* 浏览器占用时跳过 */ }
+        }
+        catch { }
+        lastSnapshot = null;
+        ApplyLocalization();
+        ApplyMascot();
+        UpdatedAt.Text = Loc.T("Login.LogoutDone");
+    }
+
+    /// <summary>简易确认对话框（Avalonia 没有内置 MessageBox）。</summary>
+    private async Task<bool> ConfirmAsync(string title, string message)
+    {
+        var result = false;
+        var dialog = new Window
+        {
+            Title = title,
+            Width = 400,
+            SizeToContent = SizeToContent.Height,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            CanResize = false,
+            Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xF8, 0xEE))
+        };
+        var yes = new Button { Content = Loc.T("Login.LogoutTitle"), Width = 100 };
+        var no = new Button { Content = Loc.T("Set.Cancel"), Width = 100, Margin = new Thickness(10, 0, 0, 0) };
+        yes.Click += (_, _) => { result = true; dialog.Close(); };
+        no.Click += (_, _) => dialog.Close();
+        dialog.Content = new StackPanel
+        {
+            Margin = new Thickness(20),
+            Children =
+            {
+                new TextBlock { Text = message, TextWrapping = Avalonia.Media.TextWrapping.Wrap },
+                new StackPanel
+                {
+                    Orientation = Avalonia.Layout.Orientation.Horizontal,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+                    Margin = new Thickness(0, 16, 0, 0),
+                    Children = { yes, no }
+                }
+            }
+        };
+        await dialog.ShowDialog(this);
+        return result;
     }
 
     /// <summary>登录窗口打开后每 10 秒自动尝试同步，成功或超过 5 分钟即停。</summary>
