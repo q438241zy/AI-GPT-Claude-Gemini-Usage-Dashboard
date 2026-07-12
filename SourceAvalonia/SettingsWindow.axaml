@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CodexWidgetCross.SettingsWindow"
+        Title="桌面额度挂件设置" Width="480" Height="620"
+        WindowStartupLocation="CenterOwner" CanResize="False"
+        Background="#FFF8EE">
+    <Grid Margin="24" RowDefinitions="Auto,*,Auto">
+        <TextBlock x:Name="TitleText" Text="桌面额度挂件设置" FontSize="25" FontWeight="Bold" Foreground="#D96022" />
+
+        <StackPanel Grid.Row="1" Margin="0,16,0,10" Spacing="4">
+            <TextBlock x:Name="LanguageLabel" Text="语言 / Language / 言語" FontWeight="Bold" Foreground="#5C341E" />
+            <ComboBox x:Name="LanguageBox" HorizontalAlignment="Stretch" SelectionChanged="Control_Changed" />
+
+            <TextBlock x:Name="ProviderLabel" Text="平台" FontWeight="Bold" Foreground="#5C341E" Margin="0,8,0,0" />
+            <ComboBox x:Name="ProviderBox" HorizontalAlignment="Stretch" SelectionChanged="Control_Changed" />
+
+            <TextBlock x:Name="BrowserLabel" Text="登录用浏览器" FontWeight="Bold" Foreground="#5C341E" Margin="0,8,0,0" />
+            <ComboBox x:Name="BrowserBox" HorizontalAlignment="Stretch" SelectionChanged="Control_Changed" />
+
+            <TextBlock x:Name="CharacterLabel" Text="角色" FontWeight="Bold" Foreground="#5C341E" Margin="0,8,0,0" />
+            <DockPanel>
+                <Button x:Name="ImportPackButton" DockPanel.Dock="Right" Content="导入角色包…" Margin="8,0,0,0"
+                        Click="ImportPack_Click" />
+                <ComboBox x:Name="CharacterBox" HorizontalAlignment="Stretch" SelectionChanged="Control_Changed" />
+            </DockPanel>
+
+            <TextBlock x:Name="ScaleLabelTitle" Text="大小" FontWeight="Bold" Foreground="#5C341E" Margin="0,8,0,0" />
+            <DockPanel>
+                <TextBlock x:Name="ScaleLabel" Width="52" VerticalAlignment="Center" Foreground="#5C341E" />
+                <Slider x:Name="ScaleSlider" Minimum="0.45" Maximum="1.35" ValueChanged="Scale_Changed" />
+            </DockPanel>
+
+            <TextBlock x:Name="OpacityLabelTitle" Text="透明度" FontWeight="Bold" Foreground="#5C341E" />
+            <DockPanel>
+                <TextBlock x:Name="OpacityLabel" Width="52" VerticalAlignment="Center" Foreground="#5C341E" />
+                <Slider x:Name="OpacitySlider" Minimum="0.25" Maximum="1" ValueChanged="Opacity_Changed" />
+            </DockPanel>
+
+            <DockPanel Margin="0,8,0,0">
+                <TextBlock x:Name="RefreshLabel" Text="自动刷新（分钟）" Width="150" VerticalAlignment="Center"
+                           Foreground="#5C341E" />
+                <TextBox x:Name="RefreshBox" Width="70" HorizontalAlignment="Left" Text="5"
+                         TextChanged="Control_TextChanged" />
+            </DockPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button x:Name="CancelButton" Content="取消" Width="86" Click="Cancel_Click" />
+            <Button x:Name="SaveButton" Content="保存" Width="86" Background="#F18A3D" Foreground="White"
+                    Click="Save_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

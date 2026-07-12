@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CodexWidgetCross.MainWindow"
+        Title="AI 额度桌面挂件" Width="380" Height="802"
+        SystemDecorations="None" TransparencyLevelHint="Transparent"
+        Background="Transparent" Topmost="True" ShowInTaskbar="False"
+        CanResize="False">
+    <Viewbox Stretch="Fill">
+        <Grid x:Name="RootGrid" Width="380" Height="802" Background="Transparent">
+            <Grid.ContextMenu>
+                <ContextMenu x:Name="WidgetMenu">
+                    <MenuItem x:Name="MenuSettings" Header="⚙ 设置…" Click="Settings_Click" />
+                    <MenuItem x:Name="MenuRefresh" Header="↻ 立即刷新" Click="Refresh_Click" />
+                    <MenuItem x:Name="MenuLogin" Header="🔐 登录" Click="Login_Click" />
+                    <Separator />
+                    <MenuItem x:Name="MenuProvider" Header="平台">
+                        <MenuItem Header="Codex" Tag="Codex" Click="ProviderMenu_Click" />
+                        <MenuItem Header="Gemini" Tag="Gemini" Click="ProviderMenu_Click" />
+                        <MenuItem Header="Claude" Tag="Claude" Click="ProviderMenu_Click" />
+                    </MenuItem>
+                    <MenuItem x:Name="MenuCharacter" Header="角色" />
+                    <Separator />
+                    <MenuItem x:Name="MenuExit" Header="退出" Click="Exit_Click" />
+                </ContextMenu>
+            </Grid.ContextMenu>
+
+            <Image x:Name="MascotImage" Stretch="Fill" IsHitTestVisible="False"
+                   RenderTransformOrigin="50%,96%" />
+
+            <Border x:Name="BoardBorder" Margin="31,38,31,0" Height="281" VerticalAlignment="Top"
+                    CornerRadius="20" Padding="18,13,18,10" RenderTransformOrigin="50%,50%">
+                <Grid RowDefinitions="Auto,*,Auto">
+                    <DockPanel Grid.Row="0">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                            <Button x:Name="BtnSettings" Content="⚙" Width="30" Height="26" Margin="3" Padding="0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
+                                    Click="Settings_Click" />
+                            <Button x:Name="BtnRefresh" Content="↻" Width="30" Height="26" Margin="3" Padding="0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
+                                    Click="Refresh_Click" />
+                            <Button x:Name="BtnClose" Content="×" Width="30" Height="26" Margin="3" Padding="0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
+                                    Click="Exit_Click" />
+                        </StackPanel>
+                        <TextBlock x:Name="DashboardTitle" Text="CODEX 能量看板" Foreground="#E66B25"
+                                   FontSize="21" FontWeight="Bold" VerticalAlignment="Center" />
+                    </DockPanel>
+
+                    <StackPanel Grid.Row="1" Margin="0,8,0,2">
+                        <TextBlock x:Name="FiveUsage" Foreground="#5C341E" FontWeight="SemiBold" FontSize="14"
+                                   TextWrapping="Wrap" Margin="0,2" Text="⏱ 5小时余量：同步中…" />
+                        <TextBlock x:Name="FiveReset" Foreground="#8B624A" FontSize="12" TextWrapping="Wrap"
+                                   Margin="0,2" Text="   重置时间：—" />
+                        <Border Height="1" Background="#E8B88D" Margin="0,5" />
+                        <TextBlock x:Name="WeekUsage" Foreground="#5C341E" FontWeight="SemiBold" FontSize="14"
+                                   TextWrapping="Wrap" Margin="0,2" Text="📅 周余量：同步中…" />
+                        <TextBlock x:Name="WeekReset" Foreground="#8B624A" FontSize="12" TextWrapping="Wrap"
+                                   Margin="0,2" Text="   重置时间：—" />
+                        <Border x:Name="ExtraSeparator" Height="1" Background="#E8B88D" Margin="0,5" />
+                        <DockPanel x:Name="CardsRow" Margin="0,2">
+                            <Border x:Name="CardBadge" DockPanel.Dock="Right" Width="30" Height="30" CornerRadius="15"
+                                    Background="#F18A3D" BorderBrush="White" BorderThickness="2"
+                                    ToolTip.Tip="重置卡可用张数">
+                                <TextBlock x:Name="CardBadgeText" Text="—" FontSize="14" FontWeight="Bold"
+                                           Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock x:Name="CardsLabel" Foreground="#5C341E" FontWeight="SemiBold" FontSize="14"
+                                       VerticalAlignment="Center" Text="🎟 可用重置卡" />
+                        </DockPanel>
+                        <TextBlock x:Name="CardExpiry" Foreground="#8B624A" FontSize="12" TextWrapping="Wrap"
+                                   Margin="0,2" Text="" />
+                        <TextBlock x:Name="ExtraUsage" Foreground="#5C341E" FontWeight="SemiBold" FontSize="14"
+                                   TextWrapping="Wrap" Margin="0,2" Text="" IsVisible="False" />
+                    </StackPanel>
+
+                    <DockPanel Grid.Row="2">
+                        <Button x:Name="LoginButton" DockPanel.Dock="Right" Content="登录" Padding="8,3"
+                                FontSize="11" Foreground="#6D3B1E" Background="#FFFFE8" BorderBrush="#E39758"
+                                Click="Login_Click" />
+                        <TextBlock x:Name="UpdatedAt" Text="等待同步" Foreground="#A0765D" FontSize="10"
+                                   VerticalAlignment="Center" />
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </Viewbox>
+</Window>

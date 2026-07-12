@@ -4,7 +4,7 @@
 
 ![小埋展示 Codex 用量资讯](docs/images/codex-umaru-preview.png)
 
-> 当前版本：V1.0（免安装绿色版）  
+> 当前版本：V1.1（免安装绿色版 · 新增 macOS / Linux 跨平台兼容版）  
 > 作者：**QQ奶茶大神**  
 > 本项目仅供个人学习、交流与非商业传播，**禁止商用**。
 
@@ -47,8 +47,9 @@ AI余额看板娘-V1.0/
 ├─ README.md                 项目介绍、使用和维护说明
 ├─ 待办事项.md               可持续增删和勾选的开发清单
 ├─ LICENSE                   个人非商用许可说明
-├─ Release/                  可直接运行的绿色版
-└─ Source/                   C# / WPF 源码
+├─ Release/                  可直接运行的绿色版（Windows）
+├─ SourceAvalonia/           跨平台兼容版源码（Windows / macOS / Linux，Avalonia）
+└─ Source/                   C# / WPF 源码（Windows 主力版）
    ├─ Assets/
    │  ├─ Umaru/
    │  │  ├─ stand/
@@ -121,6 +122,40 @@ dotnet build CodexWidget.csproj -c Release
 ```
 
 编译结果位于 `Source/bin/Release/net10.0-windows/`。发布前请将其中的程序文件同步到根目录的 `Release/`，并实际启动检查右键菜单、设置、人物切换、GIF 和快捷键。
+
+## 跨平台兼容版（Windows / macOS / Linux）
+
+V1.1 新增 `SourceAvalonia/`：用 [Avalonia](https://avaloniaui.net/) 重做界面的跨平台版本，核心功能（余额同步、状态联动、人物包、三语）与 Windows 版同一套代码。素材直接共用 `Source/Assets`。
+
+**构建与运行**（需 .NET 10 SDK；作者只有 Windows 实机，macOS / Linux 欢迎反馈问题）：
+
+```bash
+cd SourceAvalonia
+
+# 本机直接运行
+dotnet run -c Release
+
+# 打包成单文件（按目标系统选一条）
+dotnet publish -c Release -r win-x64   --self-contained -p:PublishSingleFile=true
+dotnet publish -c Release -r osx-arm64 --self-contained -p:PublishSingleFile=true   # Apple 芯片
+dotnet publish -c Release -r osx-x64   --self-contained -p:PublishSingleFile=true   # Intel Mac
+dotnet publish -c Release -r linux-x64 --self-contained -p:PublishSingleFile=true
+```
+
+产物在 `SourceAvalonia/bin/Release/net10.0/<系统>/publish/`。macOS 首次运行如被拦截，请在 系统设置 → 隐私与安全性 中允许；Linux 需要桌面环境（X11 / Wayland）。
+
+**与 Windows 主力版的差异**：
+
+| 功能 | Windows 版（Source） | 跨平台版（SourceAvalonia） |
+| --- | --- | --- |
+| 余额同步（Codex 本机直连 / 浏览器采集） | ✅ | ✅（浏览器按系统探测 Chrome / Edge / Chromium） |
+| 表情、姿势状态联动 / 人物包 / 三语 | ✅ | ✅ |
+| 看板内重置卡圆圈与到期 | ✅ | ✅ |
+| `--demo` 调试参数 | ✅ | ✅ |
+| 全局防锁死快捷键 | ✅ | ❌（各系统全局热键机制不同） |
+| 鼠标穿透 | ✅ | ❌ |
+| GIF 动画播放 | ✅ | ❌（GIF 只显示第一帧） |
+| 呼吸浮动动画 / 测试模式弹窗 | ✅ | ❌（后续版本再补） |
 
 ## 一同维护
 

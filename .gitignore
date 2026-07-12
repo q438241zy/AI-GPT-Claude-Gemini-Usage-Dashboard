@@ -1,12 +1,15 @@
 # .NET / Visual Studio generated files
 Source/bin/
 Source/obj/
+SourceAvalonia/bin/
+SourceAvalonia/obj/
 .vs/
 *.user
 *.suo
 
 # Local runtime and login data
 EdgeLoginProfile/
+LoginProfile-*/
 *.log
 
 # Local narration and operation recordings (do not publish)

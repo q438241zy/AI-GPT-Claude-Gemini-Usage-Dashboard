@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>CodexWidgetCross</AssemblyName>
+    <RootNamespace>CodexWidgetCross</RootNamespace>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.2" />
+    <!-- 覆盖 Avalonia.FreeDesktop 带入的有漏洞版本（GHSA-xrw6-gwf8-vvr9，仅影响 Linux DBus） -->
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.90.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 素材直接链接 Windows 版目录，两个版本共用一套图 -->
+    <AvaloniaResource Include="..\Source\Assets\**\*.png" Link="Assets\%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>
