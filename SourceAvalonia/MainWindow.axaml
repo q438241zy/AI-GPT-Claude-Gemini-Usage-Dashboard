@@ -29,13 +29,9 @@
 
             <Border x:Name="BoardBorder" Margin="31,38,31,0" Height="281" VerticalAlignment="Top"
                     CornerRadius="20" Padding="18,13,18,10" RenderTransformOrigin="50%,50%">
-                <Grid RowDefinitions="Auto,*,Auto">
+                <Grid RowDefinitions="Auto,*,Auto,Auto">
                     <DockPanel Grid.Row="0">
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                            <Button x:Name="RandomButton" Content="🎲" Width="30" Height="26" Margin="3" Padding="0"
-                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                    Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
-                                    Click="RandomCharacter_Click" />
                             <Button x:Name="BtnSettings" Content="⚙" Width="30" Height="26" Margin="3" Padding="0"
                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
@@ -80,7 +76,12 @@
                                    TextWrapping="Wrap" Margin="0,2" Text="" IsVisible="False" />
                     </StackPanel>
 
-                    <DockPanel Grid.Row="2">
+                    <!-- 骰子独占一行，位于「更新于…」正上方 -->
+                    <Button x:Name="RandomButton" Grid.Row="2" Content="🎲" Width="30" Height="26" Padding="0"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
+                            HorizontalAlignment="Left" Margin="0,2,0,3" Click="RandomCharacter_Click" />
+                    <DockPanel Grid.Row="3">
                         <Button x:Name="LoginButton" DockPanel.Dock="Right" Content="登录" Padding="8,3"
                                 FontSize="11" Foreground="#6D3B1E" Background="#FFFFE8" BorderBrush="#E39758"
                                 Click="Login_Click" />

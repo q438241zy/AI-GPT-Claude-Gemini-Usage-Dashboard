@@ -72,12 +72,12 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <DockPanel Grid.Row="0">
                         <TextBlock x:Name="DashboardTitle" Text="CODEX 能量看板" Foreground="#E66B25" FontSize="21"
                                    FontWeight="Bold" FontFamily="Microsoft YaHei UI" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Style="{StaticResource TinyButton}" x:Name="RandomButton" Content="🎲" ToolTip="随机换人物" Click="RandomCharacter_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="⚙" ToolTip="设置" Click="Settings_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="↻" ToolTip="立即刷新" Click="Refresh_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="×" ToolTip="退出" Click="Close_Click" />
@@ -102,7 +102,11 @@
                         </DockPanel>
                         <TextBlock x:Name="ExtraNoteText" Style="{StaticResource DataText}" FontSize="12" Foreground="#8B624A" Text="" />
                     </StackPanel>
-                    <DockPanel Grid.Row="2">
+                    <!-- 骰子独占一行，位于「更新于…」正上方 -->
+                    <Button x:Name="RandomButton" Grid.Row="2" Style="{StaticResource TinyButton}" Content="🎲"
+                            ToolTip="随机换人物" HorizontalAlignment="Left" Margin="0,2,0,3"
+                            Click="RandomCharacter_Click" />
+                    <DockPanel Grid.Row="3">
                         <TextBlock x:Name="UpdatedAt" Text="等待同步" Foreground="#A0765D" FontSize="10" VerticalAlignment="Center" />
                         <Button x:Name="LoginButton" Content="登录" Padding="8,3" HorizontalAlignment="Right" FontSize="11"
                                 Cursor="Hand" Background="#FFFFE8" BorderBrush="#E39758" Click="Login_Click" />
