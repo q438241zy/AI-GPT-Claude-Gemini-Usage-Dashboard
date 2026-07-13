@@ -32,6 +32,10 @@
                 <Grid RowDefinitions="Auto,*,Auto">
                     <DockPanel Grid.Row="0">
                         <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                            <Button x:Name="RandomButton" Content="🎲" Width="30" Height="26" Margin="3" Padding="0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                    Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"
+                                    Click="RandomCharacter_Click" />
                             <Button x:Name="BtnSettings" Content="⚙" Width="30" Height="26" Margin="3" Padding="0"
                                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                     Foreground="#6D3B1E" Background="#FFF3D0" BorderBrush="#B96A39"

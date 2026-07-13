@@ -65,6 +65,7 @@ public static class Loc
         ["Menu.ClickThrough"] = new[] { "鼠标穿透", "Click-through", "クリック透過" },
         ["Menu.Hotkeys"] = new[] { "⌨ 快捷键说明", "⌨ Hotkeys", "⌨ ショートカット" },
         ["Menu.Exit"] = new[] { "退出", "Exit", "終了" },
+        ["Menu.Random"] = new[] { "随机换人物", "Random character", "ランダムに交代" },
 
         // 提示
         ["Msg.CharacterLoadFail"] = new[] { "角色图片无法读取", "Failed to load character image", "キャラ画像を読み込めません" },

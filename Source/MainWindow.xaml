@@ -77,6 +77,7 @@
                         <TextBlock x:Name="DashboardTitle" Text="CODEX 能量看板" Foreground="#E66B25" FontSize="21"
                                    FontWeight="Bold" FontFamily="Microsoft YaHei UI" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource TinyButton}" x:Name="RandomButton" Content="🎲" ToolTip="随机换人物" Click="RandomCharacter_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="⚙" ToolTip="设置" Click="Settings_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="↻" ToolTip="立即刷新" Click="Refresh_Click" />
                             <Button Style="{StaticResource TinyButton}" Content="×" ToolTip="退出" Click="Close_Click" />

@@ -117,6 +117,7 @@ public partial class MainWindow : Window
         MenuHotkeys.Header = Loc.T("Menu.Hotkeys");
         MenuExit.Header = Loc.T("Menu.Exit");
         CardBadge.ToolTip = Loc.T("Badge.Tooltip");
+        RandomButton.ToolTip = Loc.T("Menu.Random");
         UpdateLoginButton();
         if (lastSnapshot != null) RenderUsage(lastSnapshot);
         else
@@ -563,6 +564,20 @@ public partial class MainWindow : Window
         UpdatedAt.Text = Loc.T("Login.LogoutDone");
     }
     private void Settings_Click(object sender, RoutedEventArgs e) => ShowSettings();
+
+    private static readonly Random rng = new();
+
+    /// <summary>🎲 在内置角色和已装角色包之间随机换一个（不重复当前角色）。</summary>
+    private void RandomCharacter_Click(object sender, RoutedEventArgs e)
+    {
+        var keys = new List<string> { "Doraemon", "Umaru" };
+        keys.AddRange(CharacterPack.LoadAll().Select(p => p.Key));
+        keys.Remove(settings.Character);
+        if (keys.Count == 0) return;
+        settings.Character = keys[rng.Next(keys.Count)];
+        settings.Save();
+        ApplySettings(false);
+    }
 
     private void ShowSettings()
     {
